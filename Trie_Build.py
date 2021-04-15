@@ -156,7 +156,6 @@ def build_all_entity():
         'dictionary/text/手法.txt': 'dictionary/trie/operation.pk',
         'dictionary/text/症状.txt': 'dictionary/trie/symptom.pk',
         'dictionary/text/穴位.txt': 'dictionary/trie/xuewei.pk',
-        'dictionary/text/经络.txt': 'dictionary/trie/jingluo.pk',
         'dictionary/text/身体部位.txt': 'dictionary/trie/body.pk',
         'dictionary/text/疾病.txt': 'dictionary/trie/disease.pk',
     }
@@ -172,6 +171,7 @@ def main_test():
     print(trie.root)
     print(trie.search('脑勺'))
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     # build_all_entity()
-    main_test()
+    # trie = build_trie(get_dictionary('dictionary/text/穴位.txt'))
+    # persist_trie(trie, 'dictionary/trie/xuewei.pk')
