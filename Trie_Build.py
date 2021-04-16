@@ -171,7 +171,7 @@ def main_test():
     print(trie.root)
     print(trie.search('脑勺'))
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
     # build_all_entity()
-    # trie = build_trie(get_dictionary('dictionary/text/穴位.txt'))
-    # persist_trie(trie, 'dictionary/trie/xuewei.pk')
+    trie = build_trie(get_dictionary('dictionary/text/穴位.txt'))
+    persist_trie(trie, 'dictionary/trie/xuewei.pk')

@@ -10,6 +10,7 @@ import Trie_Build
 from Trie_Build import Trie
 import os
 from tqdm import tqdm
+# import jieba
 
 
 def split_text(text, title):
@@ -137,6 +138,26 @@ def get_trie():
     return dict_trie
 
 
+def output_sample_to_txt(data_str, data_label, data_index):
+    """Output the sample to txt file
+
+    Args:
+        data_str: string. sample
+        data_label: string. BIO label of sample
+        data_index: int. to generate the filename
+
+    Returns:
+
+    """
+    if len(data_str) != len(data_label):
+        print('data is not match the label!')
+    filename = 'datalabel/' + str(data_index) + '.txt'
+    with open(filename, mode='w', encoding='utf-8') as f:
+        for index in range(len(data_str)):
+            f.write(data_str[index] + ' ' + data_label[index] + '\n')
+
+
+
 def data_label(data_list, dict_trie):
 
     # All entity kind
@@ -151,22 +172,66 @@ def data_label(data_list, dict_trie):
         'disease': 0,
     }
     # The label of the entity
-    label_dict = {
-        'function': 'FUN',
-        'operation': 'OPE',
-        'symptom': 'SYM',
-        'xuewei': 'XW',
-        'body': 'BOD',
-        'disease': 'DIS',
+    label_dict_B = {
+        'function': 'B-FUN',
+        'operation': 'B-OPE',
+        'symptom': 'B-SYM',
+        'xuewei': 'B-XW',
+        'body': 'B-BOD',
+        'disease': 'B-DIS',
     }
+    label_dict_I = {
+        'function': 'I-FUN',
+        'operation': 'I-OPE',
+        'symptom': 'I-SYM',
+        'xuewei': 'I-XW',
+        'body': 'I-BOD',
+        'disease': 'I-DIS',
+    }
+    # punctuation list
+    punctuation_list = ['\'', '\"', ',', '[', ']', '{', '}', '(', ')', '?', '<', '>', '`', '·'
+                        '“', '”','’', '‘', '，', '【', '】', '？', '。', '（', '）', '~', '《', '》']
 
     print('Labeling start.')
+    label_of_dataset = []
+    data_index = 0
     for data_string in tqdm(data_list):
-        
+        # Label the sentence
+        sentence_len = len(data_string)
+        label_of_sample = ['O' for i in range(sentence_len)]
+        index = 0
+        while index < sentence_len:
+            # Current word is punctuation
+            if data_string[index] in punctuation_list:
+                index = index + 1
+                continue
+
+            # Generate the candidate Word
+            for i in range(10, 0, -1):    # assume that the length of the word is less than 10
+                flag = False
+                if i + index < sentence_len:
+                    current_word = data_string[index: index + i]
+                    for (key, value) in dict_trie.items():
+                        if value.search(current_word):
+                            # print(current_word)
+                            label_total[key] = label_total[key] + 1
+                            label_of_sample[index] = label_dict_B[key]
+                            for j in range(len(current_word) - 1):
+                                label_of_sample[index + j + 1] = label_dict_I[key]
+                            flag = True
+                            continue
+                if flag:
+                    index = index + i
+                    continue
+            index = index + 1
+        label_of_dataset.append(label_of_sample.copy)
+        output_sample_to_txt(data_string, label_of_sample, data_index)
+        data_index = data_index + 1
+
+    print(label_total)
 
 
 if __name__ == '__main__':
     str_list_1 = read_data_from_text('data.txt')
     dict_trie = get_trie()
-
-
+    data_label(str_list_1, dict_trie)
